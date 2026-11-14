@@ -10,7 +10,6 @@ async def app_exception_handler(request: Request, exc: AppException):
         content={
             "code": exc.code,
             "message": exc.message,
-            "request_id": getattr(request.state, "request_id", None),
         },
     )
 
@@ -20,7 +19,6 @@ async def validation_exception_handler(request, exc: RequestValidationError):
         content={
             "code": "VALIDATION_ERROR",
             "message": "Validation error",
-            "request_id": getattr(request.state, "request_id", None),
             "errors": exc.errors(),
         },
     )

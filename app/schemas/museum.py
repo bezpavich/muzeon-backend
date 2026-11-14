@@ -13,6 +13,7 @@ class MuseumCreate(BaseModel):
     email: EmailStr
     phone: str = Field(min_length=11, max_length=12)
     address: str
+    city_id: int | None = None
 
 
 class MuseumUpdate(BaseModel):
@@ -21,6 +22,7 @@ class MuseumUpdate(BaseModel):
     email: EmailStr | None = None
     phone: str | None = None
     address: str | None = None
+    city_id: int | None = None
     status: MuseumStatusEnum | None = None
     subscription_plan: SubscriptionPlanEnum | None = None
     subscription_end_date: datetime | None = None
@@ -43,6 +45,7 @@ class MuseumResponse(BaseModel):
     email: str
     phone: str
     address: str
+    city_id: int | None = None
     status: MuseumStatusEnum
     subscription_plan: SubscriptionPlanEnum
     subscription_end_date: datetime

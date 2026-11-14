@@ -25,6 +25,11 @@ class Event(Base, DateMixin, UserAuditMixin):
     museum = relationship("Museum", back_populates="events")
     event_type = relationship("EventType", back_populates="events")
     location = relationship("EventLocation", back_populates="events")
+    ticket_types = relationship(
+        "TicketType",
+        back_populates="event",
+        cascade="all, delete-orphan",
+    )
 
 
 class EventLocation(Base, DateMixin, UserAuditMixin):

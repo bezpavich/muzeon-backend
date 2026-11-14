@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str
     DATABASE_ECHO_DEBUG_LOG: bool = False
+    APP_ENV: str = os.getenv("APP_ENV", "local")
     CORS_ORIGINS: list[str] = []
     VERSION: str = "0.0.1"
     URL_PREFIX: str = '/api/v1'
@@ -33,6 +34,14 @@ class Settings(BaseSettings):
     SESSION_COOKIE: str = "session_id"
     SESSION_TTL: int = 86400
 
+    CLIENT_SESSION_COOKIE: str = "client_session_id"
+    REDIS_CLIENT_SESSION_PREFIX: str = "client_session:"
+    REDIS_CLIENT_USER_SESSION_PREFIX: str = "client_user_sessions:"
+    REDIS_CLIENT_OTP_PREFIX: str = "client_otp:"
+    REDIS_CLIENT_AUTH_LINK_PREFIX: str = "client_auth_link:"
+    TELEGRAM_BOT_TOKEN: str | None = None
+    TELEGRAM_BOT_USERNAME: str = "muzeon_auth_bot"
+
     OTP_TTL: int = 300
     OTP_COOLDOWN_PREFIX: str = "otp_cooldown:"
     OTP_COOLDOWN: int = 180
@@ -42,7 +51,7 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_FROM: EmailStr = "noreply@muzeon.ru"
-    SMTP_TLS: bool = True
+    USE_TLS: bool = True
 
 
 

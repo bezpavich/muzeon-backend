@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import BigInteger, String, Enum, DateTime
+from sqlalchemy import BigInteger, String, Enum, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.models.base import Base
 from app.enums.database import MuseumStatusEnum, SubscriptionPlanEnum
@@ -18,6 +18,13 @@ class Museum(Base, DateMixin, UserAuditMixin):
     status: Mapped[MuseumStatusEnum] = mapped_column(Enum(MuseumStatusEnum), nullable=False)
     subscription_plan: Mapped[SubscriptionPlanEnum] = mapped_column(Enum(SubscriptionPlanEnum), nullable=False)
     subscription_end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    city_id: Mapped[int | None] = mapped_column(ForeignKey("city.id"), nullable=True)
+
+    city = relationship(
+        "City",
+        back_populates="museums",
+    )
 
     admins = relationship(
         "AdminUser",

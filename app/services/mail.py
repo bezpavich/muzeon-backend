@@ -15,7 +15,7 @@ class Email:
         self.email_from = settings.SMTP_FROM
         self.username = settings.SMTP_USER
         self.password = settings.SMTP_PASSWORD
-        self.start_tls = settings.SMTP_TLS
+        self.use_tls = settings.USE_TLS
 
     async def send_email(
             self,
@@ -38,7 +38,8 @@ class Email:
                 port=self.port,
                 username=self.username,
                 password=self.password,
-                start_tls=self.start_tls,
+                use_tls=self.use_tls,
+                start_tls=False
             )
             return True
         except Exception as e:
@@ -51,6 +52,9 @@ class Email:
                     "error": str(e),
                 },
             )
+            if settings.APP_ENV in ("local", "dev"):
+                logger.warning(f"[DEV MODE] Skipping real email sending. Content for {email_to}:\n{content}")
+                return True
             raise SMTPError(str(e))
 
     async def send_otp_email(self, to_email: str, otp: str) -> bool:

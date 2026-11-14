@@ -24,3 +24,10 @@ class EventStatusEnum(str, Enum):
     published = "published"
     archived = "archived"
     canceled = "canceled"
+
+
+class TicketStatusEnum(str, Enum):
+    valid = "valid"
+    used = "used"
+    canceled = "canceled"
+    expired = "expired"

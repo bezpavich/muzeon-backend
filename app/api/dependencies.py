@@ -13,10 +13,17 @@ from app.services.user import UserService
 from app.services.event import EventService
 from app.services.dashboard import DashboardService
 from app.core.config import settings
-from app.db.models import AdminUser
+from app.db.models import AdminUser, ClientUser
 from app.exceptions.auth import AuthenticationRequiredError
 from app.exceptions.http import PermissionDeniedError
 from app.services.session import SessionService
+from app.services.client_auth import ClientAuthService
+from app.services.client_catalog import ClientCatalogService
+from app.services.client_favorite import ClientFavoriteService
+from app.services.client_user import ClientUserService
+from app.services.telegram import TelegramService
+from app.services.ticket import TicketService
+from app.services.city import CityService
 from app.enums import UserRoleEnum
 
 def get_auth_service(
@@ -24,6 +31,29 @@ def get_auth_service(
     redis: Redis = Depends(get_redis),
 ) -> AuthService:
     return AuthService(session, redis)
+
+def get_city_service(session: AsyncSession = Depends(get_db)) -> CityService:
+    return CityService(session)
+
+def get_client_user_service(session: AsyncSession = Depends(get_db)) -> ClientUserService:
+    return ClientUserService(session)
+
+def get_client_catalog_service(session: AsyncSession = Depends(get_db)) -> ClientCatalogService:
+    return ClientCatalogService(session)
+
+def get_client_favorite_service(session: AsyncSession = Depends(get_db)) -> ClientFavoriteService:
+    return ClientFavoriteService(session)
+
+def get_client_auth_service(
+    session: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+) -> ClientAuthService:
+    return ClientAuthService(session, redis)
+
+def get_telegram_service(
+    redis: Redis = Depends(get_redis),
+) -> TelegramService:
+    return TelegramService(redis)
 
 def get_session_service(
     redis: Redis = Depends(get_redis),
@@ -44,6 +74,9 @@ def get_event_service(session: AsyncSession = Depends(get_db)) -> EventService:
 def get_dashboard_service(session: AsyncSession = Depends(get_db)) -> DashboardService:
     return DashboardService(session)
 
+def get_ticket_service(session: AsyncSession = Depends(get_db)) -> TicketService:
+    return TicketService(session)
+
 async def get_current_admin_user(
     request: Request,
     service: AuthService = Depends(get_auth_service),
@@ -53,6 +86,41 @@ async def get_current_admin_user(
     if not session_id:
         raise AuthenticationRequiredError
     return await service.get_current_admin_user(session_id)
+
+
+async def get_current_client_user(
+    request: Request,
+    service: ClientAuthService = Depends(get_client_auth_service),
+) -> ClientUser:
+    session_id = request.cookies.get(settings.CLIENT_SESSION_COOKIE)
+    if not session_id:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            session_id = auth_header.split(" ", 1)[1].strip()
+
+    if not session_id:
+        raise AuthenticationRequiredError()
+
+    return await service.get_current_client_user(session_id)
+
+
+async def get_optional_client_user(
+    request: Request,
+    service: ClientAuthService = Depends(get_client_auth_service),
+) -> ClientUser | None:
+    session_id = request.cookies.get(settings.CLIENT_SESSION_COOKIE)
+    if not session_id:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            session_id = auth_header.split(" ", 1)[1].strip()
+
+    if not session_id:
+        return None
+
+    try:
+        return await service.get_current_client_user(session_id)
+    except Exception:
+        return None
 
 async def get_current_superadmin(
     current_user: AdminUser = Depends(get_current_admin_user),
